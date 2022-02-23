@@ -5,8 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode exposing (Decoder, field, string, at)
-
+import Json.Decode as Decode exposing (Decoder)
 
 
 -- MAIN
@@ -46,7 +45,7 @@ type Msg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
+update msg _ =
   case msg of
     MorePlease ->
       (Loading, getRandomCatGif)
@@ -65,7 +64,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
   Sub.none
 
 
@@ -114,7 +113,7 @@ getRandomCatGif =
 
 gifDecoder : Decoder String
 gifDecoder =
-  Json.Decode.at ["data", "images", "original", "url"] Json.Decode.string
+  Decode.at ["data", "images", "original", "url"] Decode.string
 
 -- Note this line of code no longer works because the
 -- API has changed.
