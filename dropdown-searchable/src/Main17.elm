@@ -1,7 +1,10 @@
-module Main15 exposing (main)
+module Main17 exposing (main)
 import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Html.Attributes exposing (id, class)
+import Browser.Dom as Dom
+import Task
 
 
 main =
@@ -27,14 +30,17 @@ type alias Model =
 
 
 init : () -> (Model, Cmd Msg)
-init () =
-    ( { state = Open
-      , values = fruits
-      , selected = Nothing
-      , query = ""
-      }
-    , Cmd.none
+init () = 
+    (
+        { 
+            state = Closed
+            , values = fruits
+            , selected = Nothing
+            , query = ""
+        }
+        , Cmd.none
     )
+
 
 fruits : List String
 fruits =
@@ -43,6 +49,13 @@ fruits =
     , "oranges"
     , "peaches"
     , "strawberries"
+    , "nectarines"
+    , "melons"
+    , "raspberries"
+    , "apricots"
+    , "blueberries"
+    , "guava"
+    , "plantain"
     ]
 
 
@@ -58,16 +71,15 @@ view model =
 
 viewOpen : Model -> Html Msg
 viewOpen model =
-    div []
+    div [ class "dropdown" ]
         [ dropdownHead model.selected CloseSelect
-        , input [ onInput SearchInput ] []
-        , ul [] (List.map dropdownItem (filteredValues model))
+        , dropdownBody model
         ]
 
 
 viewClosed : Model -> Html Msg
 viewClosed model =
-    div []
+    div [ class "dropdown" ]
         [ dropdownHead model.selected OpenSelect
         ]
 
@@ -87,6 +99,14 @@ dropdownHead selected msg =
             p [ onClick msg ] [ text value ]
 
 
+dropdownBody : Model -> Html Msg
+dropdownBody model =
+    div [ class "dropdown-body" ]
+        [ input [ id "search-box", onInput SearchInput ] []
+        , ul [] (List.map dropdownItem (filteredValues model))
+        ]
+
+
 filteredValues : Model -> List String
 filteredValues model =
     List.filter (\v -> matchQuery model.query v) model.values
@@ -102,13 +122,17 @@ type Msg
     | CloseSelect
     | ItemSelected String
     | SearchInput String
+    | Noop
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Noop ->
+            ( model, Cmd.none )
+
         OpenSelect ->
-            ( { model | state = Open }, Cmd.none )
+            ( { model | state = Open }, focus )
 
         CloseSelect ->
             ( { model | state = Closed }, Cmd.none )
@@ -120,3 +144,9 @@ update msg model =
 
         SearchInput query ->
             ( { model | query = query }, Cmd.none )
+
+
+focus : Cmd Msg
+focus =
+    Dom.focus "search-box"
+        |> Task.attempt (always Noop)
