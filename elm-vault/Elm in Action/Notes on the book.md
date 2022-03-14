@@ -140,3 +140,7 @@ view : Model -> Html Msg
 Then the view function is taking a Model as an input parameter and outputting an Html with Msg as the output type.
 
 To enumerate all the possible "messages" that might come from the HTML, Elm allows the types to be a union of types.
+
+Definition: A *command* is a value that describes an operation for the Elm Runtime to perform. Unlike calling  a function, running the same command multiple time can have different results.
+
+NOTE: at chapter end, PhotoGroove9.elm is the final version of the code. Described in Summary on p. 84 and listed with notes in Listing 3.7 on p. 85.
