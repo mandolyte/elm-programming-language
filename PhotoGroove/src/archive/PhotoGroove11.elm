@@ -124,12 +124,10 @@ update msg model =
     ClickedSurpriseMe ->
       case model.status of 
         Loaded (firstPhoto :: otherPhotos) _ -> 
-          Random.uniform firstPhoto otherPhotos
-          |> Random.generate GotRandomPhoto
-          |> Tuple.pair model
-          -- NOTE! The value piped to Tuple.pair
-          -- becomes the last value (second value)
-          -- required for the Tuple.pair function
+          ( model
+          , Random.generate GotRandomPhoto
+              (Random.uniform firstPhoto otherPhotos)
+          )
 
         Loaded [] _ -> 
           ( model, Cmd.none )

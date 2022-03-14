@@ -144,3 +144,45 @@ To enumerate all the possible "messages" that might come from the HTML, Elm allo
 Definition: A *command* is a value that describes an operation for the Elm Runtime to perform. Unlike calling  a function, running the same command multiple time can have different results.
 
 NOTE: at chapter end, PhotoGroove9.elm is the final version of the code. Described in Summary on p. 84 and listed with notes in Listing 3.7 on p. 85.
+
+
+## Chapter 4 "Talking to Servers"
+
+The "<|" operator...
+
+These two lines do the same thing:
+```elm
+> String.toUpper (String.reverse "hello")
+"OLLEH" : String
+> String.toUpper <| String.reverse "hello"
+"OLLEH" : String
+> 
+```
+
+The "arrow" points to the direction of the data. Here the data flows right to left (same as when the first expression that uses parentheses).
+
+To pipe the data left to right use this form:
+```elm
+> String.reverse "hello" |> String.toUpper
+"OLLEH" : String
+> 
+```
+
+The placeholder character is an underscore... same as Go.
+ 
+ The "::" operator removes the first element from a list. So does List.head:
+ ```elm
+ > a1 = [1,2,3,4]
+[1,2,3,4] : List number
+> List.head a1
+Just 1 : Maybe number
+> List.tail a1
+Just [2,3,4] : Maybe (List number)
+> case List.head a1 of
+|   Just a -> a
+|   Nothing -> 0
+|   
+1 : number
+> 
+```
+
