@@ -186,3 +186,35 @@ Just [2,3,4] : Maybe (List number)
 > 
 ```
 
+Definition: an *effect* is an operation that modifies external state. A function that modifies external state when it executes has a *side effect*.
+
+On Http.get: it is a function that returns a Cmd representing the HTTP request we want to make. Here is its type:
+
+```elm
+Http.get : { url : String, expect : Expect msg } -> Cmd msg
+```
+
+Once the command completes, it will send a message (Msg) to `update` telling us what happened (p. 101).
+
+In turn, that "Expect msg" is Http.expectString toMsg.
+
+So this:
+```elm
+Http.get { url = "http://manning.com", expect = Http.expectString toMsg }
+```
+goes like this:
+- send the get request using the url
+- tell Http that we expect to get back as a response a value that is a "string", technically, an "expectString". Also allowed are "expectJson", "expectBytes", and "expectWhatever".
+- When it does return a string, process it with toMsg to transform it into a message for the update function.
+- Finally, send that message to the update function
+
+An expectString has this type:
+```elm
+type Result errValue okValue
+	= Err errValue
+	| Ok okValue
+```
+
+Thus if an error is returned, we get the errValue and if the string is returned it is the okValue.
+
+*Destructuring tuples and records* see tip on page 106.
