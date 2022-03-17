@@ -6,23 +6,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Random
 import Http
-import Json.Decode as J exposing (Decoder, int, list, string, succeed)
-import Json.Decode.Pipeline as JP exposing (optional, required)
 
 type alias Photo = 
-  { url : String 
-  , size : Int
-  , title : String 
-  }
-
-photoDecoder : Decoder Photo 
-photoDecoder = 
-  succeed Photo
-    |> JP.required "url" string 
-    |> JP.required "size" int 
-    |> JP.optional "title" string "(untitled)" -- default value
-
-
+  { url : String }
 
 type ThumbnailSize 
   = Small
@@ -34,7 +20,7 @@ type Msg
   | ClickedSize ThumbnailSize -- messages can take parameters!
   | ClickedSurpriseMe
   | GotRandomPhoto Photo
-  | GotPhotos (Result Http.Error (List Photo))
+  | GotPhotos (Result Http.Error String)
 
 urlPrefix : String
 urlPrefix = "http://elm-in-action.com/"
@@ -59,8 +45,8 @@ initialModel =
 initialCmd : Cmd Msg
 initialCmd =
   Http.get
-    { url = "http://elm-in-action.com/photos/list.json"
-    , expect = Http.expectJson GotPhotos (J.list photoDecoder)
+    { url = "http://elm-in-action.com/photos/list"
+    , expect = Http.expectString GotPhotos
     }
 --     , expect = Http.expectString (\result -> GotPhotos result)
 
@@ -99,7 +85,6 @@ viewThumbnail : String -> Photo -> Html Msg
 viewThumbnail selectedUrl thumb =
     img 
       [ src (urlPrefix ++ thumb.url) 
-      , title (thumb.title ++ " [" ++ String.fromInt thumb.size ++ " KB]")
       , classList [ ("selected", selectedUrl == thumb.url) ] 
       , onClick (ClickedPhoto thumb.url) -- messages can take parameters!
       ] []
@@ -169,17 +154,23 @@ update msg model =
     -- GotPhotos (Err httpError) ->
     -- or, if we cover the error by having an empty list, then
     -- GotPhotos (Err _) -- ignore the error text
-    GotPhotos (Ok photos) ->
-      case photos of 
-            (first :: _ ) as urls ->
-              ( { model | status = Loaded photos first.url }, Cmd.none)
+    GotPhotos result ->
+      case result of
+        Ok responseStr -> 
+          case String.split "," responseStr of 
+            (firstUrl :: _ ) as urls ->
+              let                
+                photos =
+                  List.map Photo urls 
+                  --List.map (\url -> { url = url }) urls 
+              in 
+              ( { model | status = Loaded photos firstUrl }, Cmd.none)
 
             [] ->
               ( { model | status = Errored "0 photos found" }, Cmd.none)
-
-    GotPhotos (Err _) ->   
-          ( model, Cmd.none )
-
+            
+        Err httpError ->
+          ( { model | status = Errored "Server error!" }, Cmd.none )
 selectUrl : String -> Status -> Status
 selectUrl url status =
   case status of 

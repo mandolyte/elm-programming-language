@@ -218,3 +218,50 @@ type Result errValue okValue
 Thus if an error is returned, we get the errValue and if the string is returned it is the okValue.
 
 *Destructuring tuples and records* see tip on page 106.
+
+**Section 4.3** Decoding Json
+
+Install it: `elm install elm/json`
+
+*The decodeString function*: this will decode a string of JSON.
+Returns a `Result`
+
+Type:
+```elm
+decodeString : Decoder val -> String -> Result Error val
+```
+So it takes a "decoder" and a JSON string and returns a result.
+
+Examples from repl:
+```
+> import Json.Decode exposing (Decoder, list, bool, string, int, field)
+
+> decodeString bool "42"
+Err (Failure ("Expecting a BOOL") <internals>)
+    : Result Error Bool
+> decodeString bool "false"
+Ok False : Result Error Bool
+> 
+-- "bool" is a decoder (see import list of others)
+
+-- let's write my own decoder based on the field function
+-- the field function takes two arguments:
+-- a field name: here hardcoded as "email"
+-- a json string
+
+decoder = 
+    field "email" string
+
+-- here is a json string with backslashes to escape the internal quotes
+
+jstring = "{\"email\": \"cat@wolf.com\"}"
+
+
+> decodeString decoder jstring
+Ok "cat@wolf.com" : Result Error String
+
+
+```
+
+
+
