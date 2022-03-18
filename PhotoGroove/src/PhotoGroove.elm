@@ -56,13 +56,6 @@ initialModel =
     , chosenSize = Small
   }
 
-initialCmd : Cmd Msg
-initialCmd =
-  Http.get
-    { url = "http://elm-in-action.com/photos/list.json"
-    , expect = Http.expectJson GotPhotos (J.list photoDecoder)
-    }
---     , expect = Http.expectString (\result -> GotPhotos result)
 
 view : Model -> Html Msg
 view model = 
@@ -123,14 +116,6 @@ sizeToString size =
     Large -> 
       "large"
 
-main : Program () Model Msg
-main = 
-  Browser.element
-    { init = \_ -> (initialModel, initialCmd)
-    , view = view
-    , update = update
-    , subscriptions = \_ -> Sub.none
-    }
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = 
@@ -177,8 +162,8 @@ update msg model =
             [] ->
               ( { model | status = Errored "0 photos found" }, Cmd.none)
 
-    GotPhotos (Err _) ->   
-          ( model, Cmd.none )
+    GotPhotos (Err httpError) ->   
+          ( {model | status = Errored "Server error"}, Cmd.none )
 
 selectUrl : String -> Status -> Status
 selectUrl url status =
@@ -191,3 +176,20 @@ selectUrl url status =
 
     Errored errorMessage -> 
       status
+
+initialCmd : Cmd Msg
+initialCmd =
+  Http.get
+    { url = "http://elm-in-action.com/photos/list.json"
+    , expect = Http.expectJson GotPhotos (J.list photoDecoder)
+    }
+--     , expect = Http.expectString (\result -> GotPhotos result)
+
+main : Program () Model Msg
+main = 
+  Browser.element
+    { init = \_ -> (initialModel, initialCmd)
+    , view = view
+    , update = update
+    , subscriptions = \_ -> Sub.none
+    }
