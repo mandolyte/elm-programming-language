@@ -263,5 +263,47 @@ Ok "cat@wolf.com" : Result Error String
 
 ```
 
+## Chapter 5 Talking to JavaScript
+
+In the html, there is now a "class" with a single method named "connectedCallback()". It is not clear why that name is given to the method. I assume it is part of the web components specification.
+
+The link between this class and the DOM is the registration of this class to the browser. It is this line:
+```js
+window.customeElements.define("range-slider", RangeSlider);
+```
+So when Elm creates a "range-slider", it will use the `RangeSlider` class as the implementation. I guess it just runs that callback method.
+
+In Elm, you can create arbitrary nodes using the node function. So to create a `range-slider`, this:
+
+```elm
+rangeSlider attributes children =
+	node "range-slider" attributes children
+```
+
+
+Page 131 explains in detail how the JavaScript class in the html is connected to the Elm code.
+
+Given this JSON: `{detail: {userSlidTo: 7}}`
+Then this decoder can be used to access the value:
+```elm
+field "detail"
+	(field "userSlidTo" int)
+	
+-- or a convenience function "at"
+
+at ["detail", "userSlidTo"] int
+```
+
+
+Here is some repl work (took me several tries to get it right):
+```
+> import Json.Decode exposing (..)
+> import Html exposing (..)
+> slideJson = "{ \"detail\": { \"userSlidTo\": 7 } }"
+"{ \"detail\": { \"userSlidTo\": 7 } }" : String
+> Json.Decode.decodeString (at ["detail","userSlidTo"] int) slideJson
+Ok 7 : Result Error Int
+> 
+```
 
 

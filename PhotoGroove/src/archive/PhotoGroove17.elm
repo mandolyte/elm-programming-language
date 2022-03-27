@@ -12,7 +12,6 @@ import Json.Decode.Pipeline as JP exposing (optional, required)
 import Html exposing (Attribute)
 import List exposing (range)
 import Html exposing (details)
-import Html.Events exposing (onSubmit)
 
 type alias Photo = 
   { url : String 
@@ -75,14 +74,13 @@ view model =
       Errored errorMessage ->
         [text ("Error: " ++ errorMessage)]    
 
-viewFilter : (Int -> Msg) -> String -> Int -> Html Msg
-viewFilter toMsg name magnitude = 
+viewFilter : String -> Int -> Html Msg
+viewFilter name magnitude = 
   div [ class "filter-slider" ]
       [ label [] [ text name ]
       , rangeSlider
         [ Attr.max "11" 
         , Attr.property "val" (Encode.int magnitude)
-        , onSlide toMsg
         ]
         []
       , label [] [ text (String.fromInt magnitude) ]
@@ -221,8 +219,16 @@ rangeSlider : List (Attribute msg) -> List (Html msg) -> Html msg
 rangeSlider attributes children =
   node "range-slider" attributes children
 
-onSlide : (Int -> msg) -> Attribute msg 
-onSlide toMsg =
-  at ["detail", "userSlidTo"] int 
-    |> Json.Decode.map toMsg
-    |> on "slide"
+onslide : (Int -> msg) -> Attribute msg 
+onslide toMsg =
+  let
+    detailUserSlidTo : Decoder Int
+    detailUserSlidTo = 
+      at ["detail", "userSlidTo"] int 
+    
+    msgDecoder : Decoder msg
+    msgDecoder = 
+      Json.Decode.map toMsg detailUserSlidTo
+
+  in 
+    on "slide" msgDecoder

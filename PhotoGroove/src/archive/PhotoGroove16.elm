@@ -2,17 +2,15 @@ module PhotoGroove exposing (main)
 
 import Browser
 import Html exposing (Html, node, div, h1, h3, img, text, button, input, label)
-import Html.Attributes as Attr exposing (class, classList, id, name, src, title, type_)
-import Html.Events exposing (on, onClick)
-import Json.Encode as Encode
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
+import Json.Encode
 import Random
 import Http
-import Json.Decode as J exposing (Decoder, at, int, list, string, succeed)
+import Json.Decode as J exposing (Decoder, int, list, string, succeed)
 import Json.Decode.Pipeline as JP exposing (optional, required)
 import Html exposing (Attribute)
 import List exposing (range)
-import Html exposing (details)
-import Html.Events exposing (onSubmit)
 
 type alias Photo = 
   { url : String 
@@ -75,14 +73,13 @@ view model =
       Errored errorMessage ->
         [text ("Error: " ++ errorMessage)]    
 
-viewFilter : (Int -> Msg) -> String -> Int -> Html Msg
-viewFilter toMsg name magnitude = 
+viewFilter : String -> Int -> Html Msg
+viewFilter name magnitude = 
   div [ class "filter-slider" ]
       [ label [] [ text name ]
       , rangeSlider
-        [ Attr.max "11" 
-        , Attr.property "val" (Encode.int magnitude)
-        , onSlide toMsg
+        [ Html.Attributes.max "11" 
+        , Html.Attributes.property "val" (Json.Encode.int magnitude)
         ]
         []
       , label [] [ text (String.fromInt magnitude) ]
@@ -94,11 +91,6 @@ viewLoaded photos selectedUrl chosenSize =
   , button 
     [ onClick ClickedSurpriseMe ]
     [ text "Surprise Me!" ]
-  , div [ class "filters" ]
-    [ viewFilter "Hue" 0
-    , viewFilter "Ripple" 0
-    , viewFilter "Noise" 0
-    ]
   , h3 [] [ text "Thumbnail Size:" ]
   , div [ id "choose-size" ]
     (List.map viewSizeChooser [ Small, Medium, Large ])
@@ -220,9 +212,3 @@ main =
 rangeSlider : List (Attribute msg) -> List (Html msg) -> Html msg
 rangeSlider attributes children =
   node "range-slider" attributes children
-
-onSlide : (Int -> msg) -> Attribute msg 
-onSlide toMsg =
-  at ["detail", "userSlidTo"] int 
-    |> Json.Decode.map toMsg
-    |> on "slide"
